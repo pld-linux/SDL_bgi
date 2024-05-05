@@ -1,18 +1,20 @@
-#
-# TODO python3, static libs
+# TODO: python3 (uses hatchling build system), emscripten?
+
 Summary:	The SDL_bgi Library
 Summary(pl.UTF-8):	Biblioteka SDL_bgi
 Name:		SDL_bgi
-Version:	3.0.0
+Version:	3.0.2
 Release:	1
 License:	Zlib (BSD-like)
 Group:		Libraries
-Source0:	https://sourceforge.net/projects/sdl-bgi/files/%{name}-%{version}.tar.gz
-# Source0-md5:	2a0300d89891d3bac47911394645e00d
+Source0:	https://downloads.sourceforge.net/sdl-bgi/%{name}-%{version}.tar.gz
+# Source0-md5:	8a52ed8991e0271402eea273fc775bee
 URL:		https://sdl-bgi.sourceforge.io/
-BuildRequires:	SDL2-devel
-BuildRequires:	cmake
+BuildRequires:	SDL2-devel >= 2.0
+BuildRequires:	cmake >= 3.5.0
 BuildRequires:	ninja
+BuildRequires:	rpm-build >= 4.6
+BuildRequires:	rpmbuild(macros) >= 1.736
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -28,35 +30,36 @@ and Python bindings.
 SDL_bgi jest implementacją Borland Graphics Interface ('GRAPHICS.H')
 opartą na SDL2. Ta biblioteka dokładnie emuluje funkcje BGI
 umożliwiając kompilację wersji SDL2 programów napisanych z
-użyciem Turbo C/Borlanf C++. Kolory ARGB, fonty wektorowe, obsługa
+użyciem Turbo C/Borland C++. Kolory ARGB, fonty wektorowe, obsługa
 myszy oraz wielu okien są także zaimplementowane. Dodatkowo funkcje
 natywne SDL2 mogą być użyte w programach SDL_bgi. Biblioteka
 wspiera także Wasm, używając do tego Ecmscripten i ma dowiązania
 do Pythona.
 
 %package devel
-Summary:	SDL_bgi - Header files
-Summary(pl.UTF-8):	SDL_bgi - Pliki nagłówkowe
+Summary:	SDL_bgi - header files
+Summary(pl.UTF-8):	SDL_bgi - pliki nagłówkowe
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	SDL2-devel >= 2.0
 
 %description devel
-SDL_bgi - Header files.
+Header files for SDL_bgi library.
 
 %description devel -l pl.UTF-8
-SDL_bgi - Pliki nagłówkowe.
+Pliki nagłówkowe biblioteki SDL_bgi.
 
-%package static
-Summary:	SDL_bgi - static libraries
-Summary(pl.UTF-8):	SDL_bgi - biblioteki statyczne
-Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}-%{release}
+%package apidocs
+Summary:	API documentation for SDL_bgi library
+Summary(pl.UTF-8):	Dokumentacja API biblioteki SDL_bgi
+Group:		Documentation
+BuildArch:	noarch
 
-%description static
-SDL_bgi - static libraries.
+%description apidocs
+API documentation for SDL_bgi library.
 
-%description static -l pl.UTF-8
-SDL_bgi - biblioteki statyczne.
+%description apidocs -l pl.UTF-8
+Dokumentacja API biblioteki SDL_bgi.
 
 %package examples
 Summary:	SDL_bgi - example programs
@@ -79,32 +82,39 @@ SDL_bgi - przykładowe programy.
 install -d build
 cd build
 %cmake -G Ninja \
-	../
+	..
+
 %ninja_build
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+
 %ninja_install -C build
-cp -a demo $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}/
-cp -a test $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}/
-sed -i -e 's|/usr/bin/env python3|%{_bindir}/python3|g' $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}/demo/*.py
-rm -rf $RPM_BUILD_ROOT%{_datadir}/doc
+
+cp -a demo test $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+
+%{__sed} -i -e '1s|/usr/bin/env python3|%{__python3}|' $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}/demo/*.py
+
+%{__rm} -r $RPM_BUILD_ROOT%{_datadir}/doc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS BUGS ChangeLog INSTALL_Emscripten.md INSTALL_GNU-Linux.md INSTALL_Python.md INSTALL_Windows.md INSTALL_macOS.md TODO
+%doc AUTHORS BUGS ChangeLog LICENSE README.md TODO
 %attr(755,root,root) %{_libdir}/libSDL_bgi.so
 
 %files devel
 %defattr(644,root,root,755)
-%doc doc/*
 %{_includedir}/SDL2/SDL_bgi.h
 %{_includedir}/graphics.h
-%{_mandir}/man3/graphics*
+%{_mandir}/man3/graphics.3*
+
+%files apidocs
+%defattr(644,root,root,755)
+%doc doc/*.{css,html,png} doc/{sdl_bgi-quickref,turtlegraphics}.pdf
 
 %files examples
 %defattr(644,root,root,755)
