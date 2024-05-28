@@ -9,6 +9,7 @@ License:	Zlib (BSD-like)
 Group:		Libraries
 Source0:	https://downloads.sourceforge.net/sdl-bgi/%{name}-%{version}.tar.gz
 # Source0-md5:	8a52ed8991e0271402eea273fc775bee
+Patch0:		%{name}-no-strip.patch
 URL:		https://sdl-bgi.sourceforge.io/
 BuildRequires:	SDL2-devel >= 2.0
 BuildRequires:	cmake >= 3.5.0
@@ -77,6 +78,7 @@ SDL_bgi - przykładowe programy.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 install -d build
