@@ -3,12 +3,12 @@
 Summary:	The SDL_bgi Library
 Summary(pl.UTF-8):	Biblioteka SDL_bgi
 Name:		SDL_bgi
-Version:	3.0.2
+Version:	3.0.3
 Release:	1
 License:	Zlib (BSD-like)
 Group:		Libraries
 Source0:	https://downloads.sourceforge.net/sdl-bgi/%{name}-%{version}.tar.gz
-# Source0-md5:	8a52ed8991e0271402eea273fc775bee
+# Source0-md5:	29941283a8508e8bdf1654a71e4ba4f7
 Patch0:		%{name}-no-strip.patch
 URL:		https://sdl-bgi.sourceforge.io/
 BuildRequires:	SDL2-devel >= 2.0
