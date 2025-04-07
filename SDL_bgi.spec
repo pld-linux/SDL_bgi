@@ -1,5 +1,7 @@
-# TODO: python3 (uses hatchling build system), emscripten?
-
+# TODO: emscripten?
+#
+# Conditional build:
+%bcond_without	python	# Python 3.x module
 Summary:	The SDL_bgi Library
 Summary(pl.UTF-8):	Biblioteka SDL_bgi
 Name:		SDL_bgi
@@ -14,8 +16,14 @@ URL:		https://sdl-bgi.sourceforge.io/
 BuildRequires:	SDL2-devel >= 2.0
 BuildRequires:	cmake >= 3.5.0
 BuildRequires:	ninja
+%if %{with python}
+BuildRequires:	python3 >= 1:3.8
+BuildRequires:	python3-build
+BuildRequires:	python3-hatchling
+BuildRequires:	python3-installer
+%endif
 BuildRequires:	rpm-build >= 4.6
-BuildRequires:	rpmbuild(macros) >= 1.736
+BuildRequires:	rpmbuild(macros) >= 2.045
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -76,6 +84,20 @@ SDL_bgi - example programs.
 %description examples -l pl.UTF-8
 SDL_bgi - przykładowe programy.
 
+%package -n python3-sdl_bgi
+Summary:	Python bindings for SDL_bgi library
+Summary(pl.UTF-8):	Wiązania Pythona do biblioteki SDL_bgi
+Group:		Libraries/Python
+Requires:	%{name} = %{version}-%{release}
+
+%description -n python3-sdl_bgi
+SDL_bgi is a graphics library (GRAPHICS.H) for C, C++, WebAssembly,
+and Python. It's based on SDL2 and it's portable on many platforms.
+
+%description -n python3-sdl_bgi -l pl.UTF-8
+SDL_bgi to biblioteka graficzna (GRAPHICS.H) dla C, C++, WebAssembly
+oraz Pythona. Jest oparta na SDL2 i przenośna na wiele platform.
+
 %prep
 %setup -q
 %patch -P0 -p1
@@ -88,11 +110,22 @@ cd build
 
 %ninja_build
 
+%if %{with python}
+cd ../pypi
+%py3_build_pyproject
+%endif
+
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
 %ninja_install -C build
+
+%if %{with python}
+cd pypi
+%py3_install_pyproject
+cd ..
+%endif
 
 cp -a demo test $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
@@ -121,3 +154,11 @@ rm -rf $RPM_BUILD_ROOT
 %files examples
 %defattr(644,root,root,755)
 %{_examplesdir}/%{name}-%{version}
+
+%if %{with python}
+%files -n python3-sdl_bgi
+%defattr(644,root,root,755)
+%doc pypi/{LICENSE,README.md}
+%{py3_sitescriptdir}/sdl_bgi-3.0.2.dist-info
+%{py3_sitescriptdir}/sdl_bgi
+%endif
